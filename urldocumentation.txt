@@ -1,0 +1,44 @@
+curl
+// buildAppUrl:
+http://www.dsb.dk/Rejseplan/bin/query.exe/en
+// const:
+y?
+// bb_str:
+look_minx=9740462&look_maxx=9856848&look_miny=55467860&look_maxy=55498452&
+// const:
+tpl=trains2json3&
+// no look_productclass
+// const:
+look_json=yes&performLocating=1&
+// not historicMode
+// current time:
+look_requesttime=11:31:20&
+// looknv:
+// - const:
+look_nv=get_ageofreport|yes|get_rtmsgstatus|yes|get_rtfreitextmn|yes|
+// - no min_delay
+// - no limitOnCustomerProduct
+// - getZugPosMode is empty
+// - javascript interpolation:
+interval|30000|intervalstep|2000|
+// - no maxTrains/maxnumberoftrains
+// - const:
+get_nstop|yes|get_pstop|yes|get_stopevaids|yes|tplmode|trains2json3|
+// - categoryFound:
+cats|002,097,098
+// interval and step:
+&interval=30000&intervalstep=2000&'
+-X POST
+-H 'Cookie: ...'
+-H 'Origin: http://www.dsb.dk'
+-H 'Accept-Encoding: gzip, deflate'
+-H 'Accept-Language: en-US,en;q=0.8,da;q=0.6'
+-H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'
+-H 'Content-type: application/x-www-form-urlencoded; charset=UTF-8'
+-H 'Accept: text/javascript, text/html, application/xml, text/xml, */*'
+-H 'X-Prototype-Version: 1.7.2'
+-H 'X-Requested-With: XMLHttpRequest'
+-H 'Connection: keep-alive'
+-H 'Referer: http://www.dsb.dk/Rejseplan/bin/help.exe/en?L=vs_livemap&tpl=fullscreenmap&view=dsb&responsive=1&'
+-H 'Content-Length: 0'
+--compressed
