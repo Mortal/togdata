@@ -1,5 +1,7 @@
 import json
 import argparse
+import requests
+import html5lib
 
 
 CLASSES = {
@@ -53,15 +55,22 @@ def main():
 
         trains.append(t)
 
+    n_printed = 0
+    last = None
     for t in trains:
         if args.classes and t['class'] not in args.classes:
             continue
         if args.number and args.number not in t['name'].split():
             continue
+        last = t
+        n_printed += 1
         print('%(name)s towards %(lstopname)s' % t)
         print('Travelling from %(prevstop)s to %(nextstop)s' % t)
         print('Position: %(x)s %(y)s' % t)
         print('')
+
+    if n_printed == 1:
+        print_traininfo(parse_traininfo(fetch_traininfo(last)))
 
     # by_class = {}
     # for t in trains:
@@ -69,6 +78,63 @@ def main():
 
     # for c, ts in by_class.items():
     #     print("Class %s: %s" % (c, ', '.join(t['name'] for t in ts)))
+
+
+NS = {'h': 'http://www.w3.org/1999/xhtml'}
+
+
+def element_text_content(element):
+    r"""
+    >>> s = '''
+    ... <td>
+    ... 07:51 (ank.)
+    ... <br/>
+    ... 08:00 (afg.)
+    ... </td>
+    ... '''
+    >>> from xml.etree.ElementTree import fromstring
+    >>> element_text_content(fromstring(s))
+    '07:51 (ank.)\n08:00 (afg.)'
+    """
+
+    def visit(e):
+        if e.tag == '{%s}br' % NS['h']:
+            yield '\n'
+            yield ' '.join((e.tail or '').split())
+            return
+        yield ' '.join((e.text or '').split())
+        for c in e:
+            yield ''.join(visit(c))
+        yield ' '.join((e.tail or '').split())
+
+    return ''.join(visit(element))
+
+
+def fetch_traininfo(train):
+    id = train['id']
+    base = 'http://www.dsb.dk/Rejseplan/bin/traininfo.exe/mn/'
+    url = (base + train['id'] +
+           '?L=vs_livemap.vs_dsb&date=%s' % train['refdate'] +
+           '&showWithoutHeader=yes&compactView=yes' +
+           '&prodclass=%s&' % train['class'])
+    with requests.get(url) as response:
+        document = html5lib.parse(response.content,
+                                  transport_encoding=response.encoding)
+    return document
+
+
+def parse_traininfo(document):
+    for row in document.findall('.//h:tr', NS):
+        tag_names = [cell.tag for cell in row]
+        assert all(tag == '{%s}td' % NS['h'] for tag in tag_names), (row.tag, tag_names)
+        _1, planned, name, _2, prognosis = map(element_text_content, row)
+        if planned:
+            yield planned, name, prognosis
+
+
+def print_traininfo(plan):
+    for parts in plan:
+        print('\t'.join(s.replace('\n', '-') for s in parts))
 
 
 if __name__ == "__main__":
