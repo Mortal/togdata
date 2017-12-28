@@ -1,7 +1,9 @@
+import re
 import json
 import argparse
 import requests
 import html5lib
+import collections
 
 
 CLASSES = {
@@ -70,7 +72,7 @@ def main():
         print('')
 
     if n_printed == 1:
-        print_traininfo(parse_traininfo(fetch_traininfo(last)))
+        fetch_and_print_traininfo(last)
 
     # by_class = {}
     # for t in trains:
@@ -110,8 +112,16 @@ def element_text_content(element):
     return ''.join(visit(element))
 
 
+TrainInfo = collections.namedtuple(
+    'TrainInfo',
+    'name planned_arrival actual_arrival planned_departure actual_departure')
+
+
+def fetch_and_print_traininfo(train):
+    print_traininfo(parse_traininfo(fetch_traininfo(train)))
+
+
 def fetch_traininfo(train):
-    id = train['id']
     base = 'http://www.dsb.dk/Rejseplan/bin/traininfo.exe/mn/'
     url = (base + train['id'] +
            '?L=vs_livemap.vs_dsb&date=%s' % train['refdate'] +
@@ -125,16 +135,47 @@ def fetch_traininfo(train):
 
 def parse_traininfo(document):
     for row in document.findall('.//h:tr', NS):
-        tag_names = [cell.tag for cell in row]
-        assert all(tag == '{%s}td' % NS['h'] for tag in tag_names), (row.tag, tag_names)
         _1, planned, name, _2, prognosis = map(element_text_content, row)
-        if planned:
-            yield planned, name, prognosis
+        if not planned:
+            continue
+        pattern = r'^(?:(\d+:\d+) \(ank\.\))?\n?(?:(\d+:\d+) \(afg\.\))?\Z'
+        mo = re.match(pattern, planned)
+        if not mo:
+            raise ValueError(planned)
+        planned_arrival, planned_departure = mo.groups()
+        pattern = r'^(?:(?:ca\. (\d+:\d+))?\n(?:ca\. (\d+:\d+))?)?\Z'
+        mo = re.match(pattern, prognosis)
+        if not mo:
+            raise ValueError(prognosis)
+        actual_arrival, actual_departure = mo.groups()
+        yield TrainInfo(name, planned_arrival, actual_arrival,
+                        planned_departure, actual_departure)
+
+
+def format_time(planned, actual):
+    time_width = 5
+    if not planned:
+        return ' ' * (2*time_width+1)
+    if not actual:
+        return planned.rjust(time_width) + ' ' * (time_width + 1)
+    strikethrough = '\x1B[9m'
+    red = '\x1B[31m'
+    bold = '\x1B[1m'
+    return '{delete}{planned:>5}{reset} {em}{actual:>5}{reset}'.format(
+        delete=strikethrough,
+        reset='\x1B[0m',
+        em=bold,
+        planned=planned,
+        actual=actual)
 
 
 def print_traininfo(plan):
-    for parts in plan:
-        print('\t'.join(s.replace('\n', '-') for s in parts))
+    for t in plan:
+        print(' '.join(
+            (format_time(t.planned_arrival, t.actual_arrival),
+             format_time(t.planned_departure, t.actual_departure),
+             t.name,
+            )))
 
 
 if __name__ == "__main__":
