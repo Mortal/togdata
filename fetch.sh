@@ -1,5 +1,11 @@
+#!/bin/bash
+
+set -euo pipefail
+
 T="`date +%H:%M:%S`"
-filename="`date +data%Y%m%d%H%M%S.json`"
+DIR=data
+mkdir -p "$DIR"
+filename="$DIR/`date +%Y%m%d%H%M%S.json`"
 curl -o "$filename" "\
 http://www.dsb.dk/Rejseplan/bin/query.exe/en\
 y?\
