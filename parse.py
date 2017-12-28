@@ -169,12 +169,18 @@ def format_time(planned, actual):
         actual=actual)
 
 
+def abbreviate_name(name):
+    name = re.sub(r' St\.', '', name)
+    name = re.sub(r' \(Jylland\)', ' J', name)
+    return name
+
+
 def print_traininfo(plan):
     for t in plan:
         print(' '.join(
             (format_time(t.planned_arrival, t.actual_arrival),
              format_time(t.planned_departure, t.actual_departure),
-             t.name,
+             abbreviate_name(t.name),
             )))
 
 
