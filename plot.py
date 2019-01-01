@@ -61,7 +61,7 @@ def main():
     # ax1.plot(ds, xs)
     # ax2.plot(ds, ys)
 
-    r = 2
+    r = 1
     speeds = []
     for d1, d2, x1, x2, y1, y2 in zip(
         ds[:-r], ds[r:], xs[:-r], xs[r:], ys[:-r], ys[r:]
@@ -92,11 +92,14 @@ def get_data(number, classes, date):
     filenames = sorted(glob.glob("data/%s*.json" % date))
     for filename in filenames:
         trains = parse_trains(filename)
-        train, = (
+        trains = [
             t
             for t in trains
             if t["class"] in classes and str(number) in t["name"].split()
-        )
+        ]
+        if not trains:
+            continue
+        train, = trains
         mo = re.search(
             r"(?P<year>20\d\d)(?P<month>\d\d)(?P<day>\d\d)(?P<hour>\d\d)(?P<minute>\d\d)(?P<second>\d\d)",
             filename,
