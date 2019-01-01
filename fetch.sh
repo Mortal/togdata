@@ -6,7 +6,7 @@ T="`date +%H:%M:%S`"
 DIR=data
 mkdir -p "$DIR"
 filename="$DIR/`date +%Y%m%d%H%M%S.json`"
-curl -o "$filename" "\
+curl -so "$filename" "\
 http://www.dsb.dk/Rejseplan/bin/query.exe/en\
 y?\
 look_minx=-3312240&look_maxx=26482682&look_miny=51886983&look_maxy=59631919&\
