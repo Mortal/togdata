@@ -26,14 +26,8 @@ def classlist(s):
     return res
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--classes', type=classlist, default=[1, 2])
-    parser.add_argument('-n', '--number')
-    parser.add_argument('filename')
-    args = parser.parse_args()
-
-    with open(args.filename, encoding='latin1') as fp:
+def parse_trains(filename):
+    with open(filename, encoding='latin1') as fp:
         o = json.load(fp)
 
     data_trains = o[0]
@@ -56,6 +50,17 @@ def main():
         t['poly'] = dict(zip(POLY_KEYS, t['poly']))
 
         trains.append(t)
+    return trains
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--classes', type=classlist, default=[1, 2])
+    parser.add_argument('-n', '--number')
+    parser.add_argument('filename')
+    args = parser.parse_args()
+
+    trains = parse_trains(args.filename)
 
     n_printed = 0
     last = None
