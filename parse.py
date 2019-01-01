@@ -175,12 +175,22 @@ def abbreviate_name(name):
     return name
 
 
+def name_and_delay(name, planned, actual):
+    if planned == actual or not planned or not actual:
+        return abbreviate_name(name)
+    h1, m1 = planned.split(":")
+    h2, m2 = actual.split(":")
+    delay = (int(h2) - int(h1)) * 60 + (int(m2) - int(m1))
+    return "%s (+%s)" % (abbreviate_name(name), delay)
+
+
 def print_traininfo(plan):
+    print(' STA   ETA   STD   ETD')
     for t in plan:
         print(' '.join(
             (format_time(t.planned_arrival, t.actual_arrival),
              format_time(t.planned_departure, t.actual_departure),
-             abbreviate_name(t.name),
+             name_and_delay(t.name, t.planned_arrival, t.actual_arrival),
             )))
 
 
