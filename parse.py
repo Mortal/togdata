@@ -142,6 +142,8 @@ def parse_traininfo(document):
     for row in document.findall('.//h:tr', NS):
         _1, planned, name, _2, prognosis = map(element_text_content, row)
         if prognosis in ("delvist aflyst", "delvist aflystdelvist aflyst"):
+            yield TrainInfo(name, "XX:XX", "XX:XX",
+                            "XX:XX", "XX:XX")
             continue
         if not planned:
             continue
