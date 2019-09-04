@@ -141,6 +141,8 @@ def fetch_traininfo(train):
 def parse_traininfo(document):
     for row in document.findall('.//h:tr', NS):
         _1, planned, name, _2, prognosis = map(element_text_content, row)
+        if prognosis in ("delvist aflyst", "delvist aflystdelvist aflyst"):
+            continue
         if not planned:
             continue
         pattern = r'^(?:(\d+:\d+) \(ank\.\))?\n?(?:(\d+:\d+) \(afg\.\))?\Z'
