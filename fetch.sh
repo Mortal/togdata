@@ -7,7 +7,7 @@ DIR=data
 mkdir -p "$DIR"
 filename="$DIR/`date +%Y%m%d%H%M%S.json`"
 curl -so "$filename" "\
-http://www.dsb.dk/Rejseplan/bin/query.exe/en\
+https://www.rejseplanen.dk/bin/query.exe/mn\
 y?\
 look_minx=-3312240&look_maxx=26482682&look_miny=51886983&look_maxy=59631919&\
 tpl=trains2json3&\

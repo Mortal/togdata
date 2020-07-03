@@ -127,7 +127,7 @@ def fetch_and_print_traininfo(train):
 
 
 def fetch_traininfo(train):
-    base = 'http://www.dsb.dk/Rejseplan/bin/traininfo.exe/mn/'
+    base = 'https://www.rejseplanen.dk/bin/traininfo.exe/mn/'
     url = (base + train['id'] +
            '?L=vs_livemap.vs_dsb&date=%s' % train['refdate'] +
            '&showWithoutHeader=yes&compactView=yes' +
