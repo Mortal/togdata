@@ -1,9 +1,11 @@
-import re
-import json
 import argparse
-import requests
-import html5lib
 import collections
+import json
+import re
+from typing import TypedDict
+
+import html5lib
+import requests
 
 
 CLASSES = {
@@ -26,16 +28,32 @@ def classlist(s):
     return res
 
 
+class Meta(TypedDict):
+    timestamp: str
+    interval: int
+    step: int
+
+
 def parse_trains(filename):
     with open(filename, encoding='latin1') as fp:
-        o = json.load(fp)
+        response = json.load(fp)
 
-    data_trains = o[0]
-    train_array = data_trains[:-1]
-    meta = data_trains[-1]
-    # numtrains is only a guess
-    META_KEYS = 'timestamp numtrains interval step version'.split()
-    meta = dict(zip(META_KEYS, meta))
+    if isinstance(response, dict) and "error" in response:
+        raise Exception(f"Response is an error response: {response!r}")
+    assert isinstance(response, list)
+    train_array, stop_array = response
+    train_array = train_array[:-1]
+    # numtrains is only a guess; it's not used by the official frontend.
+    # The official frontend claims that train_array[-1][5] is a date,
+    # but this is also unused, and the server only returns 5 values.
+    meta: Meta = {
+        "timestamp": train_array[-1][0],
+        # "numtrains": train_array[-1][1],
+        "interval": train_array[-1][2],
+        "step": train_array[-1][3],
+        # "version": train_array[-1][4],
+        # "date": train_array[-1][5],
+    }
 
     trains = []
 
@@ -168,7 +186,7 @@ def format_time(planned, actual):
     if not actual:
         return planned.rjust(time_width) + ' ' * (time_width + 1)
     strikethrough = '\x1B[9m'
-    red = '\x1B[31m'
+    # red = '\x1B[31m'
     bold = '\x1B[1m'
     return '{delete}{planned:>5}{reset} {em}{actual:>5}{reset}'.format(
         delete=strikethrough,
