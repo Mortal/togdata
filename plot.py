@@ -4,8 +4,7 @@ import glob
 import re
 
 import matplotlib.pyplot as plt
-import ogr
-import osr
+from osgeo import ogr, osr
 
 from parse import parse_trains, classlist
 
